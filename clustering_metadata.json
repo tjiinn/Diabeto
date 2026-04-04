@@ -1,0 +1,45 @@
+{
+  "clinical": {
+    "algorithm": "K-Means",
+    "n_clusters": 4,
+    "silhouette_score": 0.13664786664453668,
+    "davies_bouldin": 2.1167491064987494,
+    "features": [
+      "BMI",
+      "Smoker",
+      "PhysActivity",
+      "Fruits",
+      "Veggies",
+      "HvyAlcoholConsump",
+      "GenHlth",
+      "PhysHlth",
+      "DiffWalk",
+      "Sex",
+      "Age",
+      "HighBP",
+      "HighChol",
+      "CholCheck",
+      "Stroke",
+      "HeartDiseaseorAttack"
+    ]
+  },
+  "non_clinical": {
+    "algorithm": "K-Means",
+    "n_clusters": 2,
+    "silhouette_score": 0.3233293424036377,
+    "davies_bouldin": 1.588068855107795,
+    "features": [
+      "BMI",
+      "Smoker",
+      "PhysActivity",
+      "Fruits",
+      "Veggies",
+      "HvyAlcoholConsump",
+      "GenHlth",
+      "PhysHlth",
+      "DiffWalk",
+      "Sex",
+      "Age"
+    ]
+  }
+}

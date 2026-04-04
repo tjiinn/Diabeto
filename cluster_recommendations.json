@@ -1,0 +1,58 @@
+{
+  "clinical": {
+    "n_clusters": 4,
+    "algorithm": "K-Means",
+    "clusters": {
+      "0": [
+        "\ud83c\udfcb\ufe0f **Weight Management**: Your BMI indicates obesity. Aim for 5-7% weight loss through calorie deficit (500 cal/day) and regular exercise.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\ud83d\udc8a **Blood Pressure Control**: High BP prevalence in your group. Monitor BP regularly, reduce sodium intake, manage stress, consult doctor about medication.",
+        "\u2705 **Maintain Healthy Habits**: Continue current healthy lifestyle to prevent diabetes. Annual health screenings recommended."
+      ],
+      "1": [
+        "\ud83d\udea8 **High Diabetes Risk**: Your cluster has high diabetes prevalence. Urgent: Get HbA1c test, see endocrinologist, implement lifestyle changes immediately.",
+        "\ud83c\udfcb\ufe0f **Weight Management**: Your BMI indicates obesity. Aim for 5-7% weight loss through calorie deficit (500 cal/day) and regular exercise.",
+        "\ud83c\udfc3 **Get Moving**: Low physical activity detected. Start with 30 min walks daily, progress to 150 min/week moderate exercise.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\ud83d\udc8a **Blood Pressure Control**: High BP prevalence in your group. Monitor BP regularly, reduce sodium intake, manage stress, consult doctor about medication.",
+        "\ud83e\ude7a **Cholesterol Management**: High cholesterol common in your group. Reduce saturated fats, increase omega-3s, consider statin therapy if prescribed.",
+        "\u2764\ufe0f **Overall Health**: Poor general health reported. Schedule comprehensive medical check-up, address chronic conditions, focus on preventive care.",
+        "\ud83e\udd15 **Physical Health**: High number of poor physical health days. Consult healthcare provider, physical therapy may help, manage chronic pain.",
+        "\ud83d\udc74 **Senior Health**: Age increases diabetes risk. Prioritize regular screenings, maintain muscle mass through strength training, ensure adequate vitamin D."
+      ],
+      "2": [
+        "\u2696\ufe0f **Healthy Weight**: Your BMI is in the overweight range. Focus on portion control and 30+ minutes of daily activity.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\u2705 **Maintain Healthy Habits**: Continue current healthy lifestyle to prevent diabetes. Annual health screenings recommended."
+      ],
+      "3": [
+        "\u2696\ufe0f **Healthy Weight**: Your BMI is in the overweight range. Focus on portion control and 30+ minutes of daily activity.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\ud83d\udc8a **Blood Pressure Control**: High BP prevalence in your group. Monitor BP regularly, reduce sodium intake, manage stress, consult doctor about medication.",
+        "\ud83e\ude7a **Cholesterol Management**: High cholesterol common in your group. Reduce saturated fats, increase omega-3s, consider statin therapy if prescribed.",
+        "\ud83d\udc74 **Senior Health**: Age increases diabetes risk. Prioritize regular screenings, maintain muscle mass through strength training, ensure adequate vitamin D.",
+        "\u2705 **Maintain Healthy Habits**: Continue current healthy lifestyle to prevent diabetes. Annual health screenings recommended."
+      ]
+    }
+  },
+  "non_clinical": {
+    "n_clusters": 2,
+    "algorithm": "K-Means",
+    "clusters": {
+      "0": [
+        "\ud83d\udea8 **High Diabetes Risk**: Your cluster has high diabetes prevalence. Urgent: Get HbA1c test, see endocrinologist, implement lifestyle changes immediately.",
+        "\ud83c\udfcb\ufe0f **Weight Management**: Your BMI indicates obesity. Aim for 5-7% weight loss through calorie deficit (500 cal/day) and regular exercise.",
+        "\ud83c\udfc3 **Get Moving**: Low physical activity detected. Start with 30 min walks daily, progress to 150 min/week moderate exercise.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\u2764\ufe0f **Overall Health**: Poor general health reported. Schedule comprehensive medical check-up, address chronic conditions, focus on preventive care.",
+        "\ud83e\udd15 **Physical Health**: High number of poor physical health days. Consult healthcare provider, physical therapy may help, manage chronic pain.",
+        "\ud83d\udc74 **Senior Health**: Age increases diabetes risk. Prioritize regular screenings, maintain muscle mass through strength training, ensure adequate vitamin D."
+      ],
+      "1": [
+        "\u2696\ufe0f **Healthy Weight**: Your BMI is in the overweight range. Focus on portion control and 30+ minutes of daily activity.",
+        "\ud83d\udead **Quit Smoking**: Smoking significantly increases diabetes risk. Seek cessation programs, nicotine replacement therapy, or counseling.",
+        "\u2705 **Maintain Healthy Habits**: Continue current healthy lifestyle to prevent diabetes. Annual health screenings recommended."
+      ]
+    }
+  }
+}

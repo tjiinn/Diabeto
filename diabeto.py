@@ -9,6 +9,7 @@ import base64
 from scipy.stats import spearmanr
 import networkx as nx
 import requests
+import gdown
 
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")
@@ -157,13 +158,15 @@ def hierarchical_predict(model_s1, model_s2, X_test, threshold_s1=0.3, threshold
     return final_pred, stage1_proba
 
 def download_file_from_drive(file_id, output_path):
+    """Download a file from Google Drive if it doesn't exist."""
     if Path(output_path).exists():
-        return  # Already downloaded
-
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    response = requests.get(url)
-    with open(output_path, "wb") as f:
-        f.write(response.content)
+        return  # already downloaded
+    
+    url = f"https://drive.google.com/uc?id={file_id}"
+    try:
+        gdown.download(url, output_path, quiet=False)
+    except Exception as e:
+        st.error(f"⚠️ Failed to download {output_path} from Google Drive: {e}")
 
 # Load models
 @st.cache_resource

@@ -205,7 +205,7 @@ def load_models():
     models = {}
 
     # Stage 1 (local)
-    models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical.pkl')
+    models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical_compressed.pkl')
     models['stage1_non_clinical'] = safe_load_model('xgb_stage1_non_clinical.pkl')
     models['stage2_clinical'] = safe_load_model('xgb_stage2_clinical_compressed.pkl')
     models['stage2_non_clinical'] = safe_load_model('xgb_stage2_non_clinical_compressed.pkl')

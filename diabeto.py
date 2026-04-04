@@ -14,9 +14,9 @@ import gdown
 
 st.write("XGBoost version:", xgboost.__version__)
 import numpy, pandas, sklearn
-print("numpy:", numpy.__version__)
-print("pandas:", pandas.__version__)
-print("sklearn:", sklearn.__version__)
+st.write("numpy:", numpy.__version__)
+st.write("pandas:", pandas.__version__)
+st.write("sklearn:", sklearn.__version__)
 
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")

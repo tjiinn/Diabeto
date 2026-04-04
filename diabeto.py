@@ -17,6 +17,16 @@ import numpy, pandas, sklearn
 st.write("numpy:", numpy.__version__)
 st.write("pandas:", pandas.__version__)
 st.write("sklearn:", sklearn.__version__)
+files = [
+    "xgb_stage1_clinical.pkl",
+    "xgb_stage2_clinical.pkl",
+    "xgb_stage2_non_clinical.pkl"
+]
+for f in files:
+    file_path = Path(f)
+    st.write(f"{f} exists:", file_path.exists())
+    if file_path.exists():
+        st.write(f"{f} size (bytes):", file_path.stat().st_size)
 
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")

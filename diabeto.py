@@ -10,6 +10,8 @@ from scipy.stats import spearmanr
 import networkx as nx
 import requests
 import gdown
+import sys
+st.write("Python version:", sys.version)
 
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")

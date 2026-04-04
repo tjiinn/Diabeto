@@ -12,22 +12,6 @@ import xgboost
 import requests
 import gdown
 
-st.write("XGBoost version:", xgboost.__version__)
-import numpy, pandas, sklearn
-st.write("numpy:", numpy.__version__)
-st.write("pandas:", pandas.__version__)
-st.write("sklearn:", sklearn.__version__)
-files = [
-    "xgb_stage1_clinical.pkl",
-    "xgb_stage2_clinical.pkl",
-    "xgb_stage2_non_clinical.pkl"
-]
-for f in files:
-    file_path = Path(f)
-    st.write(f"{f} exists:", file_path.exists())
-    if file_path.exists():
-        st.write(f"{f} size (bytes):", file_path.stat().st_size)
-
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")
 
@@ -204,22 +188,10 @@ def safe_load_model(path):
 def load_models():
     models = {}
 
-    # Stage 1 (local)
-    models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical_compressed.pkl')
+    models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical.pkl')
     models['stage1_non_clinical'] = safe_load_model('xgb_stage1_non_clinical.pkl')
-    models['stage2_clinical'] = safe_load_model('xgb_stage2_clinical_compressed.pkl')
-    models['stage2_non_clinical'] = safe_load_model('xgb_stage2_non_clinical_compressed.pkl')
-
-    # Stage 2 (downloaded)
-    # if download_file_from_drive("1O-dJDb0pRA17ctiqVWrX7c_sVGCrrAvC", "xgb_stage2_clinical.pkl"):
-    #     models['stage2_clinical'] = safe_load_model("xgb_stage2_clinical.pkl")
-    # else:
-    #     models['stage2_clinical'] = None
-
-    # if download_file_from_drive("1R0jvRsgdl51TShv2EfbLkKLpAdEWnpPL", "xgb_stage2_non_clinical.pkl"):
-    #     models['stage2_non_clinical'] = safe_load_model("xgb_stage2_non_clinical.pkl")
-    # else:
-    #     models['stage2_non_clinical'] = None
+    models['stage2_clinical'] = safe_load_model('xgb_stage2_clinical.pkl')
+    models['stage2_non_clinical'] = safe_load_model('xgb_stage2_non_clinical.pkl')
 
     # Clustering & scalers
     models['cluster_clinical'] = safe_load_model('clustering_model_clinical.pkl')

@@ -160,40 +160,55 @@ def hierarchical_predict(model_s1, model_s2, X_test, threshold_s1=0.3, threshold
 def download_file_from_drive(file_id, output_path):
     """Download a file from Google Drive if it doesn't exist."""
     if Path(output_path).exists():
-        return  # already downloaded
-    
+        return True  # already downloaded
+
     url = f"https://drive.google.com/uc?id={file_id}"
     try:
+        import gdown
         gdown.download(url, output_path, quiet=False)
+        return Path(output_path).exists()
     except Exception as e:
         st.error(f"⚠️ Failed to download {output_path} from Google Drive: {e}")
+        return False
+    
+def safe_load_model(path):
+    if not Path(path).exists():
+        st.warning(f"⚠️ Model file not found: {path}")
+        return None
+    try:
+        import joblib
+        return joblib.load(path)
+    except Exception as e:
+        st.error(f"⚠️ Could not load model {path}: {e}")
+        return None
 
 # Load models
 @st.cache_resource
 def load_models():
-    try:
-        # download from gdrive
-        download_file_from_drive("1O-dJDb0pRA17ctiqVWrX7c_sVGCrrAvC", "xgb_stage2_clinical.pkl")
-        download_file_from_drive("1R0jvRsgdl51TShv2EfbLkKLpAdEWnpPL", "xgb_stage2_non_clinical.pkl")
+    models = {}
 
-        # load models
-        return {
-            # classifier
-            'stage1_clinical': joblib.load('xgb_stage1_clinical.pkl'),  # local
-            'stage2_clinical': joblib.load('xgb_stage2_clinical.pkl'),  # downloaded
-            'stage1_non_clinical': joblib.load('xgb_stage1_non_clinical.pkl'),  # local
-            'stage2_non_clinical': joblib.load('xgb_stage2_non_clinical.pkl'),  # downloaded
+    # Stage 1 (local)
+    models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical.pkl')
+    models['stage1_non_clinical'] = safe_load_model('xgb_stage1_non_clinical.pkl')
 
-            # clustering & scalers (local)
-            'cluster_clinical': joblib.load('clustering_model_clinical.pkl'),
-            'cluster_non_clinical': joblib.load('clustering_model_non_clinical.pkl'),
-            'scaler_clinical': joblib.load('scaler_clinical.pkl'),
-            'scaler_non_clinical': joblib.load('scaler_non_clinical.pkl')
-        }
+    # Stage 2 (downloaded)
+    if download_file_from_drive("1O-dJDb0pRA17ctiqVWrX7c_sVGCrrAvC", "xgb_stage2_clinical.pkl"):
+        models['stage2_clinical'] = safe_load_model("xgb_stage2_clinical.pkl")
+    else:
+        models['stage2_clinical'] = None
 
-    except Exception as e:
-        st.error(f"⚠️ Models not found or failed to load: {e}")
-        return None
+    if download_file_from_drive("1R0jvRsgdl51TShv2EfbLkKLpAdEWnpPL", "xgb_stage2_non_clinical.pkl"):
+        models['stage2_non_clinical'] = safe_load_model("xgb_stage2_non_clinical.pkl")
+    else:
+        models['stage2_non_clinical'] = None
+
+    # Clustering & scalers
+    models['cluster_clinical'] = safe_load_model('clustering_model_clinical.pkl')
+    models['cluster_non_clinical'] = safe_load_model('clustering_model_non_clinical.pkl')
+    models['scaler_clinical'] = safe_load_model('scaler_clinical.pkl')
+    models['scaler_non_clinical'] = safe_load_model('scaler_non_clinical.pkl')
+
+    return models
 
 # Load dataset for EDA
 @st.cache_data

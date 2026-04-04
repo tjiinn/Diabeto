@@ -207,17 +207,19 @@ def load_models():
     # Stage 1 (local)
     models['stage1_clinical'] = safe_load_model('xgb_stage1_clinical.pkl')
     models['stage1_non_clinical'] = safe_load_model('xgb_stage1_non_clinical.pkl')
+    models['stage2_clinical'] = safe_load_model('xgb_stage1_clinical_compressed.pkl')
+    models['stage2_non_clinical'] = safe_load_model('xgb_stage1_non_clinical_compressed.pkl')
 
     # Stage 2 (downloaded)
-    if download_file_from_drive("1O-dJDb0pRA17ctiqVWrX7c_sVGCrrAvC", "xgb_stage2_clinical.pkl"):
-        models['stage2_clinical'] = safe_load_model("xgb_stage2_clinical.pkl")
-    else:
-        models['stage2_clinical'] = None
+    # if download_file_from_drive("1O-dJDb0pRA17ctiqVWrX7c_sVGCrrAvC", "xgb_stage2_clinical.pkl"):
+    #     models['stage2_clinical'] = safe_load_model("xgb_stage2_clinical.pkl")
+    # else:
+    #     models['stage2_clinical'] = None
 
-    if download_file_from_drive("1R0jvRsgdl51TShv2EfbLkKLpAdEWnpPL", "xgb_stage2_non_clinical.pkl"):
-        models['stage2_non_clinical'] = safe_load_model("xgb_stage2_non_clinical.pkl")
-    else:
-        models['stage2_non_clinical'] = None
+    # if download_file_from_drive("1R0jvRsgdl51TShv2EfbLkKLpAdEWnpPL", "xgb_stage2_non_clinical.pkl"):
+    #     models['stage2_non_clinical'] = safe_load_model("xgb_stage2_non_clinical.pkl")
+    # else:
+    #     models['stage2_non_clinical'] = None
 
     # Clustering & scalers
     models['cluster_clinical'] = safe_load_model('clustering_model_clinical.pkl')

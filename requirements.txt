@@ -2,9 +2,9 @@ streamlit
 pandas
 numpy
 scikit-learn
-matplotlib
-seaborn
+xgboost
 plotly
-joblib
-networkx
 scipy
+networkx
+requests
+joblib

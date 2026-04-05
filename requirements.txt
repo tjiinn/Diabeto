@@ -8,4 +8,3 @@ scipy
 networkx
 requests
 joblib
-gdown

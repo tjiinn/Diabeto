@@ -356,7 +356,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
         'clinical': {
             0: ("Young Obese", "🧑‍⚕️"),
             1: ("Poor Health", "🤒"),
-            2: ("Healthy Young", "💪"),
+            2: ("Healthy", "💪"),
             3: ("Elderly High-Risk", "👴"),
         },
         'non_clinical': {
@@ -392,7 +392,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
                     <div style='color: #a8d8f0; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;'>Your Profile Group</div>
                     <div style='color: white; font-size: 1.5rem; font-weight: 700;'>{cluster_name}</div>
                     <div style='color: #cce4f7; font-size: 0.85rem; margin-top: 0.2rem;'>
-                        Matched to Cluster {cluster_id} of {n_clusters} · Recommendations tailored to people similar to you
+                        Recommendations tailored to people similar to you
                     </div>
                 </div>
             </div>
@@ -711,14 +711,14 @@ def eda_page():
                     """)
         st.markdown(f"""
 
-        <p style='font-size:1.05rem; line-height:1.8; margin-top:15px; color:#ffffff;'>
+        <p style='font-size:1.05rem; line-height:1.8; margin-top:15px;'>
         <b>🔄 Normal Process:</b><br>
         Food consumed →  Body breaks down food into glucose (sugar) →  Glucose enters bloodstream →  Pancreas releases insulin → <br>
         Insulin helps cells absorb glucose for energy →  Blood sugar regulated ✅
         </p>
         <img src="data:image/png;base64,{img1}" style="width:100%; max-width:500px; display:block; margin:15px auto; border-radius:10px;">
 
-        <p style='font-size:1.05rem; line-height:1.8; margin-top:15px; color:#ffffff;'>
+        <p style='font-size:1.05rem; line-height:1.8; margin-top:15px;'>
         <b>⚠️ With Diabetes:</b><br>
         Food consumed →  Body breaks down food into glucose (sugar) →  Glucose enters bloodstream →  Body doesn't produce enough insulin OR <br> 
         cannot effectively use insulin produced →  Glucose stays in bloodstream → High blood sugar levels ❌

@@ -8,9 +8,6 @@ from pathlib import Path
 import base64
 from scipy.stats import spearmanr
 import networkx as nx
-import xgboost
-import requests
-import gdown
 
 # Page config
 st.set_page_config(page_title="Diabeto", page_icon="🏥", layout="wide")
@@ -75,102 +72,6 @@ h2 {color: #2c3e50; padding-top: 1rem;}
 }
 </style>
 """, unsafe_allow_html=True)
-
-# Feature engineering function
-def create_engineered_features(X):
-    """
-    Create interaction and polynomial features that may help distinguish
-    between diabetes stages - MATCHES NOTEBOOK EXACTLY
-    """
-    X_eng = X.copy()
-    
-    # BMI-based interactions
-    X_eng['BMI_Age'] = X_eng['BMI'] * X_eng['Age']
-    X_eng['BMI_GenHlth'] = X_eng['BMI'] * X_eng['GenHlth']
-    X_eng['BMI_squared'] = X_eng['BMI'] ** 2
-    
-    # Health status combinations
-    X_eng['Poor_Health_Score'] = (
-        X_eng['GenHlth'] * 2 + 
-        X_eng['PhysHlth'] / 10
-    )
-    
-    # Lifestyle score
-    X_eng['HealthyLifestyle'] = (
-        X_eng['PhysActivity'] + 
-        X_eng['Fruits'] + 
-        X_eng['Veggies'] - 
-        X_eng['Smoker'] - 
-        X_eng['HvyAlcoholConsump']
-    )
-    
-    # Age-based interactions
-    X_eng['Age_GenHlth'] = X_eng['Age'] * X_eng['GenHlth']
-    X_eng['Age_PhysHlth'] = X_eng['Age'] * (X_eng['PhysHlth'] / 30)
-    
-    # Mobility score
-    X_eng['Mobility_Score'] = X_eng['DiffWalk'] * X_eng['PhysHlth']
-
-    # ========== MISSING SECTION - ADD THIS! ==========
-    
-    # Risk score combinations (CLINICAL FEATURES ONLY)
-    if 'HighBP' in X_eng.columns:
-        X_eng['Total_Risk_Score'] = (
-            X_eng['HighBP'] + X_eng['HighChol'] + 
-            X_eng['Stroke'] + X_eng['HeartDiseaseorAttack']
-        )
-        
-        # Metabolic syndrome proxy
-        X_eng['MetabolicSyndrome_Proxy'] = (
-            (X_eng['BMI'] > 30).astype(int) + 
-            X_eng['HighBP'] + 
-            X_eng['HighChol']
-        )
-    
-    # Health deterioration indicators (transition markers)
-    X_eng['Health_Decline'] = X_eng['GenHlth'] * (1 + X_eng['PhysHlth']/30)
-    
-    # Age-risk interactions (prediabetes often occurs in younger ages)
-    X_eng['Age_BMI_Risk'] = X_eng['Age'] * X_eng['BMI'] / 100
-    X_eng['Young_High_BMI'] = ((X_eng['Age'] < 7) & (X_eng['BMI'] > 30)).astype(int)
-    
-    # Lifestyle factors (prediabetes more responsive to lifestyle)
-    X_eng['Lifestyle_Risk'] = (
-        (1 - X_eng['PhysActivity']) + 
-        (1 - X_eng['Fruits']) + 
-        (1 - X_eng['Veggies']) + 
-        X_eng['Smoker'] + 
-        X_eng['HvyAlcoholConsump']
-    )
-    return X_eng
-
-# Hierarchical prediction
-def hierarchical_predict(model_s1, model_s2, X_test, threshold_s1=0.3, threshold_s2=0.7):
-    stage1_proba = model_s1.predict_proba(X_test)[:, 1]
-    stage1_pred = (stage1_proba >= threshold_s1).astype(int)
-    final_pred = np.zeros(len(X_test), dtype=int)
-    diabetes_mask = stage1_pred == 1
-    if diabetes_mask.sum() > 0:
-        X_diabetes = X_test[diabetes_mask]
-        stage2_proba = model_s2.predict_proba(X_diabetes)[:, 1]
-        stage2_pred = (stage2_proba >= threshold_s2).astype(int)
-        stage2_pred_remapped = stage2_pred + 1
-        final_pred[diabetes_mask] = stage2_pred_remapped
-    return final_pred, stage1_proba
-
-def download_file_from_drive(file_id, output_path):
-    """Download a file from Google Drive if it doesn't exist."""
-    if Path(output_path).exists():
-        return True  # already downloaded
-
-    url = f"https://drive.google.com/uc?id={file_id}"
-    try:
-        import gdown
-        gdown.download(url, output_path, quiet=False)
-        return Path(output_path).exists()
-    except Exception as e:
-        st.error(f"⚠️ Failed to download {output_path} from Google Drive: {e}")
-        return False
     
 def safe_load_model(path):
     if not Path(path).exists():
@@ -280,6 +181,86 @@ def get_cluster_recommendations(cluster_row, cluster_type):
         recs.append(("info", "👴 Senior Health", "Age increases diabetes risk. Prioritise regular screenings, maintain muscle mass through strength training, and ensure adequate vitamin D."))
 
     return recs
+
+# Feature engineering function
+def create_engineered_features(X):
+    """
+    Create interaction and polynomial features that may help distinguish
+    between diabetes stages - MATCHES NOTEBOOK EXACTLY
+    """
+    X_eng = X.copy()
+    
+    # BMI-based interactions
+    X_eng['BMI_Age'] = X_eng['BMI'] * X_eng['Age']
+    X_eng['BMI_GenHlth'] = X_eng['BMI'] * X_eng['GenHlth']
+    X_eng['BMI_squared'] = X_eng['BMI'] ** 2
+    
+    # Health status combinations
+    X_eng['Poor_Health_Score'] = (
+        X_eng['GenHlth'] * 2 + 
+        X_eng['PhysHlth'] / 10
+    )
+    
+    # Lifestyle score
+    X_eng['HealthyLifestyle'] = (
+        X_eng['PhysActivity'] + 
+        X_eng['Fruits'] + 
+        X_eng['Veggies'] - 
+        X_eng['Smoker'] - 
+        X_eng['HvyAlcoholConsump']
+    )
+    
+    # Age-based interactions
+    X_eng['Age_GenHlth'] = X_eng['Age'] * X_eng['GenHlth']
+    X_eng['Age_PhysHlth'] = X_eng['Age'] * (X_eng['PhysHlth'] / 30)
+    
+    # Mobility score
+    X_eng['Mobility_Score'] = X_eng['DiffWalk'] * X_eng['PhysHlth']
+    
+    # Risk score combinations (clinical)
+    if 'HighBP' in X_eng.columns:
+        X_eng['Total_Risk_Score'] = (
+            X_eng['HighBP'] + X_eng['HighChol'] + 
+            X_eng['Stroke'] + X_eng['HeartDiseaseorAttack']
+        )
+        
+        # Metabolic syndrome proxy
+        X_eng['MetabolicSyndrome_Proxy'] = (
+            (X_eng['BMI'] > 30).astype(int) + 
+            X_eng['HighBP'] + 
+            X_eng['HighChol']
+        )
+    
+    # Health deterioration indicators (transition markers)
+    X_eng['Health_Decline'] = X_eng['GenHlth'] * (1 + X_eng['PhysHlth']/30)
+    
+    # Age-risk interactions (prediabetes often occurs in younger ages)
+    X_eng['Age_BMI_Risk'] = X_eng['Age'] * X_eng['BMI'] / 100
+    X_eng['Young_High_BMI'] = ((X_eng['Age'] < 7) & (X_eng['BMI'] > 30)).astype(int)
+    
+    # Lifestyle factors (prediabetes more responsive to lifestyle)
+    X_eng['Lifestyle_Risk'] = (
+        (1 - X_eng['PhysActivity']) + 
+        (1 - X_eng['Fruits']) + 
+        (1 - X_eng['Veggies']) + 
+        X_eng['Smoker'] + 
+        X_eng['HvyAlcoholConsump']
+    )
+    return X_eng
+
+# Hierarchical prediction
+def hierarchical_predict(model_s1, model_s2, X_test, threshold_s1=0.3, threshold_s2=0.7):
+    stage1_proba = model_s1.predict_proba(X_test)[:, 1]
+    stage1_pred = (stage1_proba >= threshold_s1).astype(int)
+    final_pred = np.zeros(len(X_test), dtype=int)
+    diabetes_mask = stage1_pred == 1
+    if diabetes_mask.sum() > 0:
+        X_diabetes = X_test[diabetes_mask]
+        stage2_proba = model_s2.predict_proba(X_diabetes)[:, 1]
+        stage2_pred = (stage2_proba >= threshold_s2).astype(int)
+        stage2_pred_remapped = stage2_pred + 1
+        final_pred[diabetes_mask] = stage2_pred_remapped
+    return final_pred, stage1_proba
 
 # Helper functions
 def get_base64_image(image_path):

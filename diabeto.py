@@ -461,7 +461,7 @@ def main():
     if page == "📊 Dashboard":
         eda_page()
 
-    elif page == "🔍 Prediction":
+    elif page == "🔍 Risk Prediction & Recommendations":
         tab1, tab2 = st.tabs(["Clinical Assessment", "Non-Clinical Assessment"])
         with tab1:
             clinical_form()
@@ -1250,7 +1250,7 @@ def eda_page():
             df_temp['Smoker'] - 
             df_temp['HvyAlcoholConsump']
         )
-        
+
         # Combined Impact Visualization - More Dynamic
         st.markdown("#### 🚀 The Compound Effect: Multiple Healthy Habits")
 
@@ -1263,7 +1263,6 @@ def eda_page():
             (df_temp['HvyAlcoholConsump'] == 0).astype(int)
         )
 
-        # Only consider 1–5 behaviors
         behavior_range = list(range(1, 6))
         behavior_risk = []
 
@@ -1273,7 +1272,7 @@ def eda_page():
                 diabetes_pct = (subset['Diabetes_012'] == 2).sum() / len(subset) * 100
                 behavior_risk.append(diabetes_pct)
             else:
-                behavior_risk.append(None)  # better than 0 (avoids misleading drop)
+                behavior_risk.append(None)
 
         fig = go.Figure()
 
@@ -1315,7 +1314,6 @@ def eda_page():
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # Show the powerful impact (now using 1 vs 5 instead of 0 vs 5)
         if behavior_risk[0] is not None and behavior_risk[-1] is not None:
             risk_reduction = behavior_risk[0] - behavior_risk[-1]
 

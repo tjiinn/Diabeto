@@ -449,7 +449,7 @@ def main():
         # ✅ EDA FIRST (Landing Page)
         page = st.radio(
             "Go to",
-            ["📊 Dashboard", "🔍 Prediction"],
+            ["📊 Dashboard", "🔍 Risk Prediction & Recommendations"],
             index=0  # ensures EDA loads by default
         )
         

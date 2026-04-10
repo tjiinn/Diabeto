@@ -354,18 +354,36 @@ def display_results(prediction, probability, module_type, input_eng, models):
 
     CLUSTER_NAMES = {
         'clinical': {
-            0: ("Young Obese", "🧑‍⚕️"),
-            1: ("Poor Health", "🤒"),
-            2: ("Healthy", "💪"),
-            3: ("Elderly High-Risk", "👴"),
+            0: ("Young Obese", "🧑‍⚕️", 
+                "Younger individuals with high BMI and elevated lifestyle risk. This group often lacks chronic clinical conditions but is on a trajectory toward metabolic complications if habits are not addressed early.",
+                ["Weight reduction", "Physical activity", "Dietary improvement"],
+                "Early intervention is critical — lifestyle changes at this stage are highly effective at reversing risk trajectory."),
+            1: ("Poor Health", "🤒",
+                "Individuals with consistently poor self-reported health, high physical health burden, and multiple comorbidities. This group experiences the most days of poor physical health and significant difficulty with mobility.",
+                ["Medical management", "Pain & mobility support", "Mental and physical wellbeing"],
+                "Focus on working closely with healthcare providers to manage existing conditions while gradually improving lifestyle factors."),
+            2: ("Healthy", "💪",
+                "Generally healthy individuals with good lifestyle habits, lower BMI, and fewer clinical risk factors. This group has the lowest diabetes prevalence and serves as the baseline for healthy behaviours.",
+                ["Maintenance", "Preventive screening", "Sustaining healthy habits"],
+                "Keep up the great work — your priority is maintaining current habits and staying on top of routine health screenings."),
+            3: ("Elderly High-Risk", "👴",
+                "Older individuals with a high prevalence of clinical risk factors including high blood pressure, high cholesterol, heart disease history, and elevated BMI. This group carries the highest diabetes burden.",
+                ["Blood pressure & cholesterol control", "Cardiovascular risk management", "Senior-specific health monitoring"],
+                "Urgent attention to clinical risk factors is needed. Regular specialist consultations and medication adherence are essential at this stage."),
         },
         'non_clinical': {
-            0: ("Poor Health & Lifestyle", "⚠️"),
-            1: ("Healthy Lifestyle", "✅"),
+            0: ("Poor Health & Lifestyle", "⚠️",
+                "Individuals with unhealthy lifestyle patterns — low physical activity, poor diet, higher rates of smoking and alcohol use, and poor self-reported health. This group has significantly higher diabetes and prediabetes prevalence.",
+                ["Lifestyle overhaul", "Physical activity", "Dietary habits", "Substance use reduction"],
+                "Comprehensive lifestyle change is the most impactful intervention available to this group — small consistent steps can significantly shift risk."),
+            1: ("Healthy Lifestyle", "✅",
+                "Individuals with generally positive lifestyle behaviours — physically active, eating fruits and vegetables regularly, and reporting better overall health. This group has lower diabetes prevalence.",
+                ["Habit maintenance", "Preventive awareness", "Routine check-ups"],
+                "You are already on the right track. Focus on consistency and don't neglect annual health screenings even when feeling well."),
         }
     }
 
-    if profiles is not None:    
+    if profiles is not None:
         try:
             input_scaled = scaler.transform(input_eng)
             cluster_id = int(cluster_model.predict(input_scaled)[0])
@@ -374,33 +392,122 @@ def display_results(prediction, probability, module_type, input_eng, models):
             n_clusters = len(profiles)
 
             profile_key = 'clinical' if is_clinical else 'non_clinical'
-            cluster_name, cluster_icon = CLUSTER_NAMES[profile_key].get(cluster_id, (f"Group {cluster_id}", "🔵"))
+            cluster_info = CLUSTER_NAMES[profile_key].get(cluster_id, (f"Group {cluster_id}", "🔵", "", [], ""))
+            cluster_name, cluster_icon, cluster_profile, advice_focus, cluster_summary = cluster_info
 
-            # Cluster badge header
+            # ── Cluster badge ──
             st.markdown(f"""
             <div style='
                 background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                padding: 1.2rem 1.8rem;
+                padding: 1.4rem 1.8rem;
                 border-radius: 12px;
-                margin-bottom: 1.2rem;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
+                margin-bottom: 1rem;
             '>
-                <span style='font-size: 2.5rem;'>{cluster_icon}</span>
-                <div>
-                    <div style='color: #a8d8f0; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;'>Your Profile Group</div>
-                    <div style='color: white; font-size: 1.5rem; font-weight: 700;'>{cluster_name}</div>
-                    <div style='color: #cce4f7; font-size: 0.85rem; margin-top: 0.2rem;'>
-                        Recommendations tailored to people similar to you
-                    </div>
+                <div style='color: #a8d8f0; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem;'>Your Profile Group</div>
+                <div style='display: flex; align-items: center; gap: 0.8rem;'>
+                    <span style='font-size: 2.2rem;'>{cluster_icon}</span>
+                    <span style='color: white; font-size: 1.6rem; font-weight: 700;'>{cluster_name}</span>
+                </div>
+                <div style='color: #cce4f7; font-size: 0.88rem; margin-top: 0.5rem;'>
+                    Matched to Cluster {cluster_id} of {n_clusters} · Recommendations tailored to people similar to you
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
+            # ── Cluster Insights Expander ──
+            with st.expander("🔍 View Cluster Insights", expanded=False):
+
+                col_a, col_b = st.columns([1, 1])
+
+                with col_a:
+                    st.markdown("##### 👤 Profile")
+                    st.markdown(f"""
+                    <div style='
+                        background: #f8fafc;
+                        border-left: 4px solid #3498db;
+                        border-radius: 8px;
+                        padding: 0.9rem 1.1rem;
+                        color: #2d3748;
+                        font-size: 0.95rem;
+                        line-height: 1.7;
+                    '>{cluster_profile}</div>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown("##### 🎯 Advice Focus Areas")
+                    focus_html = "".join([
+                        f"<span style='display:inline-block; background:#ebf8ff; color:#2b6cb0; border-radius:20px; padding:0.25rem 0.75rem; margin:0.2rem; font-size:0.85rem; font-weight:600;'>• {f}</span>"
+                        for f in advice_focus
+                    ])
+                    st.markdown(f"<div style='margin-top:0.3rem;'>{focus_html}</div>", unsafe_allow_html=True)
+
+                with col_b:
+                    st.markdown("##### 📊 Cluster Statistics")
+
+                    diabetes_pct = cluster_row.get('Diabetes_Pct', 0)
+                    prediabetes_pct = cluster_row.get('Prediabetes_Pct', 0)
+                    no_diabetes_pct = cluster_row.get('No_Diabetes_Pct', 0)
+                    cluster_size = int(cluster_row.get('Size', 0))
+
+                    # Mini donut chart
+                    fig_donut = go.Figure(data=[go.Pie(
+                        labels=['No Diabetes', 'Prediabetes', 'Diabetes'],
+                        values=[no_diabetes_pct, prediabetes_pct, diabetes_pct],
+                        hole=0.55,
+                        marker=dict(colors=['#28a745', '#ffc107', '#dc3545']),
+                        textinfo='percent',
+                        textfont_size=11,
+                        showlegend=True,
+                    )])
+                    fig_donut.update_layout(
+                        height=220,
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        legend=dict(orientation='h', yanchor='bottom', y=-0.25, xanchor='center', x=0.5, font=dict(size=10)),
+                        annotations=[dict(text=f"{cluster_size:,}<br>people", x=0.5, y=0.5, font_size=11, showarrow=False, font_color='#2d3748')]
+                    )
+                    st.plotly_chart(fig_donut, use_container_width=True)
+
+                    # Key feature stats
+                    stat_rows = [
+                        ("BMI", f"{cluster_row.get('BMI', 0):.1f}"),
+                        ("Avg Age Group", f"{cluster_row.get('Age', 0):.1f}"),
+                        ("Physical Activity", f"{cluster_row.get('PhysActivity', 0)*100:.0f}% active"),
+                        ("Smokers", f"{cluster_row.get('Smoker', 0)*100:.0f}%"),
+                    ]
+                    if is_clinical:
+                        stat_rows += [
+                            ("High BP", f"{cluster_row.get('HighBP', 0)*100:.0f}%"),
+                            ("High Cholesterol", f"{cluster_row.get('HighChol', 0)*100:.0f}%"),
+                        ]
+
+                    for label, val in stat_rows:
+                        st.markdown(f"""
+                        <div style='display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #e2e8f0; font-size:0.88rem;'>
+                            <span style='color:#718096;'>{label}</span>
+                            <span style='color:#2d3748; font-weight:600;'>{val}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                # Summary banner across full width
+                st.markdown(f"""
+                <div style='
+                    background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+                    border-left: 4px solid #3182ce;
+                    border-radius: 8px;
+                    padding: 0.85rem 1.1rem;
+                    margin-top: 1rem;
+                    color: #2c5282;
+                    font-size: 0.93rem;
+                    line-height: 1.6;
+                '>
+                    <b>📝 Summary: </b>{cluster_summary}
+                </div>
+                """, unsafe_allow_html=True)
+
+            # ── Recommendation cards ──
+            st.markdown("#### 📋 Your Recommendations")
+
             recs = get_cluster_recommendations(cluster_row, module_type)
 
-            # Style config per level
             level_styles = {
                 "error":   {"bg": "#fff0f0", "border": "#e53e3e", "icon": "🚨", "label_color": "#c53030"},
                 "warning": {"bg": "#fffbeb", "border": "#d69e2e", "icon": "⚠️", "label_color": "#b7791f"},

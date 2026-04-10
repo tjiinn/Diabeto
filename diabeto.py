@@ -1156,7 +1156,7 @@ def eda_page():
         st.markdown("---")
         
         # risk factor network
-        st.markdown("#### 🕸️ How Risk Factors Connect to Each Other")
+        st.markdown("#### 🕸️ How Risk Factors Connect")
 
         corr_features = ['BMI', 'HighBP', 'HighChol', 'Smoker', 'Stroke', 
                         'HeartDiseaseorAttack', 'PhysActivity', 'Fruits', 
@@ -1250,66 +1250,6 @@ def eda_page():
             df_temp['Smoker'] - 
             df_temp['HvyAlcoholConsump']
         )
-        
-        # Interactive Lifestyle Score Distribution        
-        fig = go.Figure()
-        
-        colors = ['#28a745', '#ffc107', '#dc3545']
-        for idx, (status, name, color) in enumerate([(0, 'No Diabetes', '#28a745'), 
-                                                      (1, 'Prediabetes', '#ffc107'), 
-                                                      (2, 'Diabetes', '#dc3545')]):
-            data = df_temp[df_temp['Diabetes_012'] == status]['Lifestyle_Score']
-            fig.add_trace(go.Violin(
-                y=data,
-                name=name,
-                box_visible=True,
-                meanline_visible=True,
-                fillcolor=color,
-                opacity=0.6,
-                x0=name,
-                hovertemplate='<b>%{x}</b><br>Score: %{y}<br><extra></extra>'
-            ))
-        
-        fig.update_layout(
-            title="Healthy Lifestyle Score Distribution by Diabetes Status<br><sub>Score = Exercise + Fruits + Veggies - Smoking - Heavy Alcohol</sub>",
-            yaxis_title="Lifestyle Score (Higher is Better)",
-            height=500,
-            yaxis=dict(range=[-3, 4])
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Calculate mean scores
-        mean_scores = [df_temp[df_temp['Diabetes_012'] == i]['Lifestyle_Score'].mean() for i in [0, 1, 2]]
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Average Score - Healthy", f"{mean_scores[0]:.2f}", "Baseline")
-        with col2:
-            delta_pre = mean_scores[1] - mean_scores[0]
-            st.metric("Average Score - Prediabetes", f"{mean_scores[1]:.2f}", f"{delta_pre:+.2f}")
-        with col3:
-            delta_dia = mean_scores[2] - mean_scores[0]
-            st.metric("Average Score - Diabetes", f"{mean_scores[2]:.2f}", f"{delta_dia:+.2f}")
-        
-        with st.expander("📖 Understanding Lifestyle Scores"):
-            st.markdown("""            
-            **Positive Factors (+1 each):**
-            - ✅ Regular physical activity
-            - ✅ Daily fruit consumption
-            - ✅ Daily vegetable consumption
-            
-            **Negative Factors (-1 each):**
-            - ❌ Smoking
-            - ❌ Heavy alcohol consumption
-            
-            **Score Range:** -2 (worst) to +3 (best)
-            
-            **Key Insight:**
-            Healthy individuals have **higher average scores** compared to those with prediabetes/diabetes. 
-            This shows that lifestyle choices have a **measurable impact** on diabetes risk.
-            """)
-        
-        st.markdown("---")
         
         # Combined Impact Visualization - More Dynamic
         st.markdown("#### 🚀 The Compound Effect: Multiple Healthy Habits")

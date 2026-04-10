@@ -284,6 +284,15 @@ def map_age_to_category(age):
     elif age <= 79: return 12
     else: return 13
 
+def category_to_age_range(age_category):
+    age_map = {
+        1: "18–24", 2: "25–29", 3: "30–34", 4: "35–39",
+        5: "40–44", 6: "45–49", 7: "50–54", 8: "55–59",
+        9: "60–64", 10: "65–69", 11: "70–74",
+        12: "75–79", 13: "80+"
+    }
+    return age_map.get(int(round(age_category)), "Unknown")
+
 def bp_to_high_bp(systolic):
     return 1 if systolic >= 140 else 0
 
@@ -414,123 +423,124 @@ def display_results(prediction, probability, module_type, input_eng, models):
             </div>
             """, unsafe_allow_html=True)
 
-            # ── Cluster Insights Expander ──
-            with st.expander("🔍 View Cluster Insights", expanded=False):
+            # Health profile insights
+            st.markdown("### 🔍 Health Profile Insights")
+            col_a, col_b = st.columns([1, 1])
 
-                col_a, col_b = st.columns([1, 1])
+            with col_a:
+                st.markdown("##### 👤 Profile")
+                st.markdown(f"""
+                <div style='
+                    background: #f8fafc;
+                    border-left: 4px solid #3498db;
+                    border-radius: 8px;
+                    padding: 0.9rem 1.1rem;
+                    color: #2d3748;
+                    font-size: 0.95rem;
+                    line-height: 1.7;
+                '>{cluster_profile}</div>
+                """, unsafe_allow_html=True)
 
-                with col_a:
-                    st.markdown("##### 👤 Profile")
+                st.markdown("##### 🎯 Advice Focus Areas")
+                focus_html = "".join([
+                    f"<span style='display:inline-block; background:#ebf8ff; color:#2b6cb0; border-radius:20px; padding:0.25rem 0.75rem; margin:0.2rem; font-size:0.85rem; font-weight:600;'>• {f}</span>"
+                    for f in advice_focus
+                ])
+                st.markdown(f"<div style='margin-top:0.3rem;'>{focus_html}</div>", unsafe_allow_html=True)
+
+            with col_b:
+                st.markdown("##### 📊 Cluster Statistics")
+
+                diabetes_pct = cluster_row.get('Diabetes_Pct', 0)
+                prediabetes_pct = cluster_row.get('Prediabetes_Pct', 0)
+                no_diabetes_pct = cluster_row.get('No_Diabetes_Pct', 0)
+                cluster_size = int(cluster_row.get('Size', 0))
+
+                # cluster diabetes distribution chart
+                fig_donut = go.Figure(data=[go.Pie(
+                    labels=['No Diabetes', 'Prediabetes', 'Diabetes'],
+                    values=[no_diabetes_pct, prediabetes_pct, diabetes_pct],
+                    hole=0.55,
+                    marker=dict(colors=['#28a745', '#ffc107', '#dc3545']),
+                    textinfo='percent',
+                    textfont_size=11,
+                    hovertemplate="%{label}: %{percent:.2%}<extra></extra>",
+                    showlegend=True,
+                )])
+                fig_donut.update_layout(
+                    height=220,
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    legend=dict(orientation='h', yanchor='bottom', y=-0.25, xanchor='center', x=0.5, font=dict(size=10)),
+                    annotations=[dict(text=f"{cluster_size:,}<br>people", x=0.5, y=0.5, font_size=11, showarrow=False, font_color='#2d3748')]
+                )
+                st.plotly_chart(fig_donut, use_container_width=True)
+
+                # Key feature stats
+                stat_rows = [
+                    ("BMI", f"{cluster_row.get('BMI', 0):.1f}"),
+                    ("Average Age", category_to_age_range(cluster_row.get('Age', 0))),
+                    ("Physically Active", f"{cluster_row.get('PhysActivity', 0)*100:.0f}%"),
+                    ("Smokers", f"{cluster_row.get('Smoker', 0)*100:.0f}%"),
+                ]
+                if is_clinical:
+                    bp_pct = cluster_row.get('HighBP', 0) * 100
+                    chol_pct = cluster_row.get('HighChol', 0) * 100
+
+                    stat_rows += [
+                        ("Blood Pressure", f"{bp_pct:.0f}% have high blood pressure"),
+                        ("Cholesterol", f"{chol_pct:.0f}% have high cholesterol"),
+                    ]
+
+                for label, val in stat_rows:
+                    st.markdown(f"""
+                <div style='display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid rgba(150,150,150,0.2); font-size:0.92rem;'>
+                    <span style='color: var(--text-color); opacity:0.7;'>{label}</span>
+                    <span style='color: var(--text-color); font-weight:600;'>{val}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            # Summary banner across full width
+            st.markdown(f"""
+            <div style='
+                background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+                border-left: 4px solid #3182ce;
+                border-radius: 8px;
+                padding: 0.85rem 1.1rem;
+                margin-top: 1rem;
+                color: #2c5282;
+                font-size: 0.93rem;
+                line-height: 1.6;
+            '>
+                <b>📝 Summary: </b>{cluster_summary}
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Recommendations
+            with st.expander("📋 **VIEW RECOMMENDATIONS**", expanded=True):
+                recs = get_cluster_recommendations(cluster_row, module_type)
+
+                level_styles = {
+                    "error":   {"bg": "#fff0f0", "border": "#e53e3e", "icon": "🚨", "label_color": "#c53030"},
+                    "warning": {"bg": "#fffbeb", "border": "#d69e2e", "icon": "⚠️", "label_color": "#b7791f"},
+                    "success": {"bg": "#f0fff4", "border": "#38a169", "icon": "✅", "label_color": "#276749"},
+                    "info":    {"bg": "#ebf8ff", "border": "#3182ce", "icon": "ℹ️", "label_color": "#2b6cb0"},
+                }
+
+                for level, title, body in recs:
+                    s = level_styles.get(level, level_styles["info"])
                     st.markdown(f"""
                     <div style='
-                        background: #f8fafc;
-                        border-left: 4px solid #3498db;
+                        background: {s["bg"]};
+                        border-left: 4px solid {s["border"]};
                         border-radius: 8px;
-                        padding: 0.9rem 1.1rem;
-                        color: #2d3748;
-                        font-size: 0.95rem;
-                        line-height: 1.7;
-                    '>{cluster_profile}</div>
-                    """, unsafe_allow_html=True)
-
-                    st.markdown("##### 🎯 Advice Focus Areas")
-                    focus_html = "".join([
-                        f"<span style='display:inline-block; background:#ebf8ff; color:#2b6cb0; border-radius:20px; padding:0.25rem 0.75rem; margin:0.2rem; font-size:0.85rem; font-weight:600;'>• {f}</span>"
-                        for f in advice_focus
-                    ])
-                    st.markdown(f"<div style='margin-top:0.3rem;'>{focus_html}</div>", unsafe_allow_html=True)
-
-                with col_b:
-                    st.markdown("##### 📊 Cluster Statistics")
-
-                    diabetes_pct = cluster_row.get('Diabetes_Pct', 0)
-                    prediabetes_pct = cluster_row.get('Prediabetes_Pct', 0)
-                    no_diabetes_pct = cluster_row.get('No_Diabetes_Pct', 0)
-                    cluster_size = int(cluster_row.get('Size', 0))
-
-                    # Mini donut chart
-                    fig_donut = go.Figure(data=[go.Pie(
-                        labels=['No Diabetes', 'Prediabetes', 'Diabetes'],
-                        values=[no_diabetes_pct, prediabetes_pct, diabetes_pct],
-                        hole=0.55,
-                        marker=dict(colors=['#28a745', '#ffc107', '#dc3545']),
-                        textinfo='percent',
-                        textfont_size=11,
-                        showlegend=True,
-                    )])
-                    fig_donut.update_layout(
-                        height=220,
-                        margin=dict(l=10, r=10, t=10, b=10),
-                        legend=dict(orientation='h', yanchor='bottom', y=-0.25, xanchor='center', x=0.5, font=dict(size=10)),
-                        annotations=[dict(text=f"{cluster_size:,}<br>people", x=0.5, y=0.5, font_size=11, showarrow=False, font_color='#2d3748')]
-                    )
-                    st.plotly_chart(fig_donut, use_container_width=True)
-
-                    # Key feature stats
-                    stat_rows = [
-                        ("BMI", f"{cluster_row.get('BMI', 0):.1f}"),
-                        ("Avg Age Group", f"{cluster_row.get('Age', 0):.1f}"),
-                        ("Physical Activity", f"{cluster_row.get('PhysActivity', 0)*100:.0f}% active"),
-                        ("Smokers", f"{cluster_row.get('Smoker', 0)*100:.0f}%"),
-                    ]
-                    if is_clinical:
-                        stat_rows += [
-                            ("High BP", f"{cluster_row.get('HighBP', 0)*100:.0f}%"),
-                            ("High Cholesterol", f"{cluster_row.get('HighChol', 0)*100:.0f}%"),
-                        ]
-
-                    for label, val in stat_rows:
-                        st.markdown(f"""
-                        <div style='display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #e2e8f0; font-size:0.88rem;'>
-                            <span style='color:#718096;'>{label}</span>
-                            <span style='color:#2d3748; font-weight:600;'>{val}</span>
+                        padding: 0.9rem 1.2rem;
+                        margin-bottom: 0.7rem;
+                    '>
+                        <div style='font-weight: 700; color: {s["label_color"]}; margin-bottom: 0.2rem;'>
+                            {s["icon"]} {title}
                         </div>
-                        """, unsafe_allow_html=True)
-
-                # Summary banner across full width
-                st.markdown(f"""
-                <div style='
-                    background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
-                    border-left: 4px solid #3182ce;
-                    border-radius: 8px;
-                    padding: 0.85rem 1.1rem;
-                    margin-top: 1rem;
-                    color: #2c5282;
-                    font-size: 0.93rem;
-                    line-height: 1.6;
-                '>
-                    <b>📝 Summary: </b>{cluster_summary}
-                </div>
-                """, unsafe_allow_html=True)
-
-            # ── Recommendation cards ──
-            st.markdown("#### 📋 Your Recommendations")
-
-            recs = get_cluster_recommendations(cluster_row, module_type)
-
-            level_styles = {
-                "error":   {"bg": "#fff0f0", "border": "#e53e3e", "icon": "🚨", "label_color": "#c53030"},
-                "warning": {"bg": "#fffbeb", "border": "#d69e2e", "icon": "⚠️", "label_color": "#b7791f"},
-                "success": {"bg": "#f0fff4", "border": "#38a169", "icon": "✅", "label_color": "#276749"},
-                "info":    {"bg": "#ebf8ff", "border": "#3182ce", "icon": "ℹ️", "label_color": "#2b6cb0"},
-            }
-
-            for level, title, body in recs:
-                s = level_styles.get(level, level_styles["info"])
-                st.markdown(f"""
-                <div style='
-                    background: {s["bg"]};
-                    border-left: 4px solid {s["border"]};
-                    border-radius: 8px;
-                    padding: 0.9rem 1.2rem;
-                    margin-bottom: 0.7rem;
-                '>
-                    <div style='font-weight: 700; color: {s["label_color"]}; margin-bottom: 0.2rem;'>
-                        {s["icon"]} {title}
+                        <div style='color: #2d3748; font-size: 0.95rem; line-height: 1.6;'>{body}</div>
                     </div>
-                    <div style='color: #2d3748; font-size: 0.95rem; line-height: 1.6;'>{body}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
 
         except Exception as e:
             st.warning(f"Could not generate cluster-based recommendations: {e}")

@@ -449,7 +449,7 @@ def main():
         # ✅ EDA FIRST (Landing Page)
         page = st.radio(
             "Go to",
-            ["📊 Dashboard", "🔍 Risk Prediction & Recommendations"],
+            ["📊 Dashboard", "🔍 Diabetes Prediction"],
             index=0  # ensures EDA loads by default
         )
         
@@ -461,7 +461,7 @@ def main():
     if page == "📊 Dashboard":
         eda_page()
 
-    elif page == "🔍 Risk Prediction & Recommendations":
+    elif page == "🔍 Diabetes Prediction":
         tab1, tab2 = st.tabs(["Clinical Assessment", "Non-Clinical Assessment"])
         with tab1:
             clinical_form()

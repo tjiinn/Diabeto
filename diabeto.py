@@ -140,7 +140,6 @@ def get_cluster_recommendations(cluster_row, cluster_type):
     diabetes_pct = row.get('Diabetes_Pct', 0)
     prediabetes_pct = row.get('Prediabetes_Pct', 0)
 
-    # Risk level (insert at front after determining)
     if diabetes_pct > 30:
         recs.append(("error", "🚨 High Diabetes Risk", "Your profile group has high diabetes prevalence. Get an HbA1c test, see an endocrinologist, and implement lifestyle changes immediately."))
     elif prediabetes_pct > 30:
@@ -416,9 +415,6 @@ def display_results(prediction, probability, module_type, input_eng, models):
                 <div style='display: flex; align-items: center; gap: 0.8rem;'>
                     <span style='font-size: 2.2rem;'>{cluster_icon}</span>
                     <span style='color: white; font-size: 1.6rem; font-weight: 700;'>{cluster_name}</span>
-                </div>
-                <div style='color: #cce4f7; font-size: 0.88rem; margin-top: 0.5rem;'>
-                    Matched to Cluster {cluster_id} of {n_clusters} · Recommendations tailored to people similar to you
                 </div>
             </div>
             """, unsafe_allow_html=True)

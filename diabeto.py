@@ -216,7 +216,7 @@ def create_engineered_features(X):
     # Mobility score
     X_eng['Mobility_Score'] = X_eng['DiffWalk'] * X_eng['PhysHlth']
     
-    # Risk score combinations (clinical)
+    # Risk score (clinical)
     if 'HighBP' in X_eng.columns:
         X_eng['Total_Risk_Score'] = (
             X_eng['HighBP'] + X_eng['HighChol'] + 
@@ -349,7 +349,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
         st.metric("Risk Score", f"{probability*100:.1f}%")
         st.metric("Module", module_type.replace(" Assessment", ""))
 
-    # --- CLUSTER-BASED RECOMMENDATIONS ---
+    # RECOMMENDATIONS
     st.markdown("---")
     st.markdown("### 💡 Personalised Recommendations")
 
@@ -403,7 +403,6 @@ def display_results(prediction, probability, module_type, input_eng, models):
             cluster_info = CLUSTER_NAMES[profile_key].get(cluster_id, (f"Group {cluster_id}", "🔵", "", [], ""))
             cluster_name, cluster_icon, cluster_profile, advice_focus, cluster_summary = cluster_info
 
-            # ── Cluster badge ──
             st.markdown(f"""
             <div style='
                 background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
@@ -471,7 +470,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
                 )
                 st.plotly_chart(fig_donut, use_container_width=True)
 
-                # Key feature stats
+                # feature stats
                 stat_rows = [
                     ("BMI", f"{cluster_row.get('BMI', 0):.1f}"),
                     ("Average Age", category_to_age_range(cluster_row.get('Age', 0))),
@@ -494,7 +493,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
                     <span style='color: var(--text-color); font-weight:600;'>{val}</span>
                 </div>
                 """, unsafe_allow_html=True)
-            # Summary banner across full width
+            # Summary banner
             st.markdown(f"""
             <div style='
                 background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
@@ -510,7 +509,7 @@ def display_results(prediction, probability, module_type, input_eng, models):
             </div>
             """, unsafe_allow_html=True)
 
-            # Recommendations
+            # view recommendations
             with st.expander("📋 **VIEW RECOMMENDATIONS**", expanded=True):
                 recs = get_cluster_recommendations(cluster_row, module_type)
 
@@ -839,7 +838,7 @@ def eda_page():
         <img src="data:image/png;base64,{img2}" style="width:100%; max-width:500px; display:block; margin:15px auto; border-radius:10px;">
 """, unsafe_allow_html=True)
         
-        # Severity and complications
+        # why you should act now section
         st.markdown("### ⚡ Why You Should Act NOW")
         
         col1, col2 = st.columns([1, 1])
@@ -875,12 +874,12 @@ def eda_page():
         # The hidden danger
         st.markdown("### 🕵️ The Hidden Danger: Undiagnosed Cases")
         
-        # Create visualization showing diagnosed vs undiagnosed
+        # visualization showing diagnosed vs undiagnosed
         fig = go.Figure()
         
         categories = ['Diabetes<br>(38M Americans)', 'Prediabetes<br>(98M Americans)']
-        diagnosed = [80, 20]  # 80% diagnosed for diabetes, 20% for prediabetes
-        undiagnosed = [20, 80]  # 20% undiagnosed for diabetes, 80% for prediabetes
+        diagnosed = [80, 20]
+        undiagnosed = [20, 80]
         
         fig.add_trace(go.Bar(
             name='Diagnosed & Aware',
@@ -995,7 +994,7 @@ def eda_page():
         
         st.markdown("---")
         
-        # Class Distribution - Interactive Pie and Bar
+        # Class Distribution charts
         col1, col2 = st.columns(2)
         
         with col1:
@@ -1146,7 +1145,7 @@ def eda_page():
             # Sort and take top 10
             feat_imp_df = feat_imp_df.sort_values('Importance', ascending=True).tail(10)
 
-            # Plot (UNCHANGED)
+            # Plot
             fig = go.Figure(go.Bar(
                 x=feat_imp_df['Importance'],
                 y=feat_imp_df['Readable'],
@@ -1277,7 +1276,6 @@ def eda_page():
 
         corr_matrix = df[corr_features].corr()
 
-        # Build graph
         G = nx.Graph()
 
         # Add edges for strong correlations only
@@ -1288,7 +1286,6 @@ def eda_page():
                 if abs(corr) > threshold:
                     G.add_edge(corr_features[i], corr_features[j], weight=abs(corr))
 
-        # Layout
         pos = nx.spring_layout(G, seed=42)
 
         # Extract edges
